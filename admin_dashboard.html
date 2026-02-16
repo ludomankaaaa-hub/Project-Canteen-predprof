@@ -1,0 +1,857 @@
+{% extends "base.html" %}
+
+{% block title %}Панель администратора - Школьная столовая{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-cogs"></i> Панель управления администратора</h1>
+        <div class="user-welcome">
+            <h2>Администратор: {{user.username}}</h2>
+            <p>Дата: {{ today_date.strftime('%d.%m.%Y') }}</p>
+        </div>
+    </div>
+
+    <!-- Статистика в карточках -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_users }}</h3>
+                <p>Всего пользователей</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_students }}</h3>
+                <p>Учеников</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_cooks }}</h3>
+                <p>Поваров</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_admins }}</h3>
+                <p>Администраторов</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_orders }}</h3>
+                <p>Всего заказов</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_payments }}</h3>
+                <p>Оплат</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-ruble-sign"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ "%.2f"|format(total_revenue) }} ₽</h3>
+                <p>Общая выручка</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ "%.1f"|format(avg_rating) }}</h3>
+                <p>Средний рейтинг</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Заявки на закупку -->
+        <div class="dashboard-card">
+            <h3><i class="fas fa-clipboard-check"></i> Заявки на закупку</h3>
+
+            {% if pending_requests %}
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Продукт</th>
+                            <th>Количество</th>
+                            <th>Запросил</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in pending_requests %}
+                        <tr>
+                            <td>{{ request.id }}</td>
+                            <td>
+                                {% if request.product %}
+                                    {{ request.product.name }}
+                                {% else %}
+                                    Продукт удален
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if request.product %}
+                                    {{ request.quantity }} {{ request.product.unit }}
+                                {% else %}
+                                    {{ request.quantity }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if request.requester %}
+                                    {{ request.requester.username }}
+                                {% else %}
+                                    Неизвестно
+                                {% endif %}
+                            </td>
+                            <td>{{ request.request_date.strftime('%d.%m.%Y') if request.request_date else '' }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm btn-success" onclick="approveRequest({{ request.id }})">
+                                        <i class="fas fa-check"></i> Одобрить
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="rejectRequest({{ request.id }})">
+                                        <i class="fas fa-times"></i> Отклонить
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-data-message">
+                <i class="fas fa-clipboard-check fa-3x"></i>
+                <h4>Нет заявок на рассмотрение</h4>
+                <p>Все заявки обработаны</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Последние пользователи -->
+        <div class="dashboard-card">
+            <h3><i class="fas fa-user-plus"></i> Последние регистрации</h3>
+
+            {% if recent_users %}
+            <div class="users-list">
+                {% for recent_user in recent_users %}
+                <div class="user-item">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-info">
+                        <h4>{{ recent_user.username }}</h4>
+                        <p class="user-role">
+                            <span class="role-badge role-{{ recent_user.role }}">
+                                {% if recent_user.role == 'student' %}
+                                    Ученик
+                                {% elif recent_user.role == 'cook' %}
+                                    Повар
+                                {% elif recent_user.role == 'admin' %}
+                                    Администратор
+                                {% else %}
+                                    {{ recent_user.role }}
+                                {% endif %}
+                            </span>
+                        </p>
+                        <p class="user-email">{{ recent_user.email or 'Email не указан' }}</p>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn btn-sm btn-outline" onclick="viewUser({{ recent_user.id }})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-data-message">
+                <i class="fas fa-users fa-3x"></i>
+                <h4>Пользователи не найдены</h4>
+                <p>В системе еще нет пользователей</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Последние отзывы -->
+    <div class="dashboard-card">
+        <h3><i class="fas fa-comments"></i> Последние отзывы</h3>
+
+        {% if recent_reviews %}
+        <div class="reviews-grid">
+            {% for review in recent_reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="review-rating">
+                        {% for i in range(5) %}
+                            {% if i < review.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="review-date">{{ review.date.strftime('%d.%m.%Y %H:%M') if review.date else '' }}</span>
+                </div>
+                <h4>{{ review.dish_name }}</h4>
+                <p class="review-comment">{{review.comment or 'Без комментария'}}</p>
+                <div class="review-author">
+                    <i class="fas fa-user"></i>
+                    {% if review.student %}
+                        {{ review.student.user.username if review.student.user else 'Аноним' }}
+                    {% else %}
+                        Аноним
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-data-message">
+            <i class="fas fa-comment-dots fa-3x"></i>
+            <h4>Отзывов пока нет</h4>
+            <p>Пользователи еще не оставили отзывов</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Быстрые действия администратора -->
+    <div class="quick-actions">
+        <h3><i class="fas fa-bolt"></i> Быстрые действия</h3>
+        <div class="action-buttons-grid">
+            <button class="action-btn" onclick="addNewUser()">
+                <i class="fas fa-user-plus"></i>
+                <span>Добавить пользователя</span>
+            </button>
+            <button class="action-btn" onclick="generateReport()">
+                <i class="fas fa-file-export"></i>
+                <span>Создать отчет</span>
+            </button>
+            <button class="action-btn" onclick="manageMenu()">
+                <i class="fas fa-utensils"></i>
+                <span>Управление меню</span>
+            </button>
+            <button class="action-btn" onclick="systemSettings()">
+                <i class="fas fa-sliders-h"></i>
+                <span>Настройки системы</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для добавления продукта -->
+<div id="addProductModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus"></i> Добавить продукт</h3>
+            <span class="close-modal" onclick="closeModal('addProductModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <!-- УБРАТЬ action из формы, будем обрабатывать через JavaScript -->
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label for="productName">Название продукта:*</label>
+                    <input type="text" id="productName" name="name" required
+                           placeholder="Например: Молоко, Картофель">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentQuantity">Текущее количество:*</label>
+                        <input type="number" id="currentQuantity" name="current_quantity"
+                               required min="0" step="0.1" placeholder="0" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unit">Единица измерения:*</label>
+                        <select id="unit" name="unit" required>
+                            <option value="">Выберите единицу</option>
+                            <option value="кг">килограмм (кг)</option>
+                            <option value="г">грамм (г)</option>
+                            <option value="л">литр (л)</option>
+                            <option value="мл">миллилитр (мл)</option>
+                            <option value="шт">штука (шт)</option>
+                            <option value="уп">упаковка (уп)</option>
+                            <option value="бан">банка (бан)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="minQuantity">Минимальный запас:*</label>
+                    <input type="number" id="minQuantity" name="min_quantity"
+                           required min="0" step="0.1" placeholder="Минимальное количество">
+                    <small class="form-text">Система предупредит, когда запасы опустятся ниже этого уровня</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить продукт
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                            onclick="closeModal('addProductModal')">
+                        Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Функции для панели администратора
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Панель администратора загружена');
+});
+
+// Одобрить заявку
+function approveRequest(requestId) {
+    if (confirm('Одобрить эту заявку на закупку?')) {
+        fetch(`/api/purchase-request/${requestId}/approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: 'approved' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при обработке запроса');
+        });
+    }
+}
+
+// Отклонить заявку
+function rejectRequest(requestId) {
+    if (confirm('Отклонить эту заявку на закупку?')) {
+        fetch(`/api/purchase-request/${requestId}/approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+    body: JSON.stringify({ status: 'rejected' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при обработке запроса');
+        });
+    }
+}
+
+// Просмотр пользователя
+function viewUser(userId) {
+    alert(`Просмотр пользователя #${userId}\n\nЭта функция будет реализована в следующей версии`);
+}
+
+// Быстрые действия
+function addNewUser() {
+    alert('Добавление нового пользователя\n\nФорма будет реализована в следующей версии');
+}
+
+function generateReport() {
+    alert('Генерация отчета\n\nВыберите тип отчета:\n1. Финансовый отчет\n2. Отчет по посещаемости\n3. Отчет по закупкам');
+}
+
+function manageMenu() {
+    window.location.href = '/menu';
+}
+
+function systemSettings() {
+    alert('Настройки системы\n\nДоступно в следующей версии');
+}
+
+// Модальные окна
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Закрытие модального окна при клике вне его
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+</script>
+
+<style>
+/* Стили для панели администратора */
+.dashboard {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 10px 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-welcome h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.user-welcome p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-left: 5px solid #4CAF50;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.stat-info h3 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.stat-info p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+}
+
+.dashboard-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.admin-table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+}
+
+.admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+}
+
+.btn-success {
+    background: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.btn-danger {
+    background: #f44336;
+    color: white;
+    border: none;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    background: #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #666;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-info h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.role-student {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.role-cook {
+    background: #E8F5E9;
+    color: #388E3C;
+}
+
+.role-admin {
+    background: #F3E5F5;
+    color: #7B1FA2;
+}
+
+.user-email {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.user-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.review-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.review-rating {
+    color: #FFD54F;
+    font-size: 0.9rem;
+}
+
+.review-date {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.review-card h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.review-comment {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+}
+
+.review-author {
+    color: #999;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.no-data-message i {
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.no-data-message h4 {
+    margin: 10px 0;
+    color: #444;
+}
+
+.quick-actions {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    margin-top: 30px;
+    border: 1px solid #eee;
+}
+
+.action-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.action-btn:hover {
+    border-color: #4CAF50;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.action-btn i {
+    font-size: 24px;
+    color: #4CAF50;
+}
+
+.action-btn span {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 10px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px;
+    background: #4CAF50;
+    color: white;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-modal {
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+@media (max-width: 992px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 15px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-buttons-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+    grid-template-columns: 1fr;
+    }
+
+    .user-item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

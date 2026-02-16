@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Школьная столовая{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-utensils"></i> Школьная Столовая
+            </a>
+            <div class="nav-links">
+                {% if session.user_id %}
+                    <span class="user-info">
+                        <i class="fas fa-user"></i> {{ session.username }} ({{ session.role }})
+                    </span>
+                    <a href="{{ url_for('menu') }}"><i class="fas fa-book"></i> Меню</a>
+                    {% if session.role == 'student' %}
+                        <a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Личный кабинет</a>
+                    <!-- В навигационной панели для повара -->
+                    {% elif session.role == 'cook' %}
+
+                        <a href="{{ url_for('cook_dashboard') }}"><i class="fas fa-hat-chef"></i> Кабинет повара</a>
+                        <a href="{{ url_for('purchase_statistics') }}"><i class="fas fa-chart-bar"></i> Статистика закупок</a>
+                    {% elif session.role == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-cogs"></i> Панель управления</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Вход</a>
+                    <a href="{{ url_for('register') }}" class="register-btn">
+                        <i class="fas fa-user-plus"></i> Регистрация
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>© 2024 Школьная столовая. Все права защищены.</p>
+        <p>Система автоматизации питания образовательных учреждений</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

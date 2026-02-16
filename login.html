@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Вход - Школьная столовая{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2><i class="fas fa-sign-in-alt"></i> Вход в систему</h2>
+        
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Имя пользователя:</label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Введите ваш логин">
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Пароль:</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Введите ваш пароль">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Еще нет аккаунта? 
+                <a href="{{ url_for('register') }}">Зарегистрируйтесь</a>
+            </p>
+            <p>
+                <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Вернуться на главную</a>
+            </p>
+        </div>
+        
+        <div class="demo-accounts">
+            <h4>Тестовые аккаунты:</h4>
+            <ul>
+                <li><strong>Ученик:</strong> student / student123</li>
+                <li><strong>Повар:</strong> cook / cook123</li>
+                <li><strong>Админ:</strong> admin / admin123</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

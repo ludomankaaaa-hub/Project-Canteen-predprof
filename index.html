@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Школьная столовая{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1><i class="fas fa-school"></i> Добро пожаловать в школьную столовую!</h1>
+        <p class="subtitle">Современная система заказа и учета питания</p>
+        
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-user-graduate"></i>
+                <h3>Для учеников</h3>
+                <p>Бронируйте и оплачивайте питание онлайн</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-utensils"></i>
+                <h3>Для поваров</h3>
+                <p>Учет заказов и контроль запасов</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>Для администрации</h3>
+                <p>Статистика и управление системой</p>
+            </div>
+        </div>
+        
+        {% if not session.user_id %}
+        <div class="auth-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Войти в систему
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </a>
+        </div>
+        {% else %}
+        <div class="welcome-back">
+            <h2>С возвращением, {{ session.username }}!</h2>
+            <p>Ваша роль: {{ session.role }}</p>
+            <a href="
+                {% if session.role == 'student' %}
+                    {{ url_for('student_dashboard') }}
+                {% elif session.role == 'cook' %}
+                    {{ url_for('cook_dashboard') }}
+                {% elif session.role == 'admin' %}
+                    {{ url_for('admin_dashboard') }}
+                {% endif %}
+            " class="btn btn-primary">
+                <i class="fas fa-arrow-right"></i> Перейти в личный кабинет
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="info-section">
+    <h2><i class="fas fa-info-circle"></i> Как это работает?</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Регистрация</h3>
+            <p>Создайте аккаунт ученика, повара или администратора</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Выбор питания</h3>
+            <p>Просматривайте меню и выбирайте блюда на неделю</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Оплата</h3>
+            <p>Оплачивайте разово или приобретайте абонемент</p>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Получение</h3>
+            <p>Получайте питание в столовой по вашему заказу</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

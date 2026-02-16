@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет ученика - Школьная столовая</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Заголовок */
+        .dashboard-header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h1 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .student-details {
+            color: #666;
+        }
+
+        .student-details p {
+            margin: 5px 0;
+        }
+
+        /* Сетка */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Карточки */
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4CAF50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Меню */
+        .menu-items {
+            display: grid;
+            gap: 20px;
+        }
+
+        .menu-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #4CAF50;
+        }
+
+        .menu-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .menu-item-header h4 {
+            color: #333;
+            margin: 0;
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .menu-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+            white-space: nowrap;
+        }
+
+        .menu-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .menu-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .meal-type {
+            background: #e3f2fd;
+            color: #1976D2;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .available-count {
+            color: #666;
+        }
+
+        /* Кнопки */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3d8b40;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+
+        /* Таблица заказов */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Статусы */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-issued {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Сообщения */
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+
+        /* Сообщение "нет данных" */
+        .no-data-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-data-message i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .no-data-message h4 {
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        /* Навигация */
+        .nav-links {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-links .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="dashboard-header">
+            <h1><i class="fas fa-user-graduate"></i> Личный кабинет ученика</h1>
+            <h2>Здравствуйте, {{ user.username }}!</h2>
+
+            <div class="user-info">
+                <div class="student-details">
+                    <p><strong>Класс:</strong> {{ student.grade }}</p>
+                    <p><strong>Аллергии:</strong> {{ student.allergies or 'Не указаны' }}</p>
+                    <p><strong>Предпочтения:</strong> {{ student.preferences or 'Не указаны' }}</p>
+                </div>
+
+                <div class="balance-card">
+                    <div class="balance-label">Ваш баланс</div>
+                    <div class="balance-amount">{{ student.balance }} ₽</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сообщения flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif category == 'danger' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle"></i>
+                            {% endif %}
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Основной контент -->
+        <div class="dashboard-grid">
+            <!-- Меню на сегодня -->
+            <div class="dashboard-card">
+                <h3><i class="fas fa-utensils"></i> Меню на сегодня</h3>
+
+                {% if today_menu %}
+                <div class="menu-items">
+                    {% for menu in today_menu %}
+                    <div class="menu-item">
+                        <div class="menu-item-header">
+                            <h4>{{ menu.dish_name }}</h4>
+                            <span class="menu-price">{{ menu.price }} ₽</span>
+                        </div>
+
+                        <p class="menu-description">{{ menu.description or 'Описание отсутствует' }}</p>
+
+                        <div class="menu-details">
+                            <span class="meal-type">
+                                {% if menu.meal_type == 'breakfast' %}
+                                    <i class="fas fa-sun"></i> Завтрак
+                                {% else %}
+                                    <i class="fas fa-utensil-spoon"></i> Обед
+                                {% endif %}
+                            </span>
+                            <span class="available-count">
+                                <i class="fas fa-box"></i> Доступно: {{ menu.available_count }} порций
+                            </span>
+                        </div>
+
+                        {% if menu.available_count > 0 %}
+                        <form method="POST" action="{{ url_for('create_order_frontend') }}">
+                            <input type="hidden" name="menu_id" value="{{ menu.id }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart"></i> Заказать
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-primary" disabled>
+                            <i class="fas fa-times"></i> Закончилось
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <i class="fas fa-utensils"></i>
+                    <h4>Меню на сегодня отсутствует</h4>
+                    <p>Пожалуйста, зайдите позже</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Мои заказы -->
+            <div class="dashboard-card">
+                <h3><i class="fas fa-clipboard-list"></i> Мои заказы на сегодня</h3>
+
+                {% if today_orders %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Блюдо</th>
+                                <th>Статус</th>
+                                <th>Время</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in today_orders %}
+                            <tr>
+                                <td>
+                                    {% if order.menu %}
+                                        {{ order.menu.dish_name }}
+                                    {% else %}
+                                        Блюдо #{{ order.menu_id }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ order.status }}">
+                                        {% if order.status == 'pending' %}
+                                            <i class="fas fa-clock"></i> Ожидает оплаты
+                                        {% elif order.status == 'paid' %}
+                                            <i class="fas fa-check"></i> Оплачено
+                                        {% elif order.status == 'issued' %}
+                                            <i class="fas fa-box"></i> Выдано
+                                        {% else %}
+                                            {{ order.status }}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if order.order_date %}
+                                        {{ order.order_date.strftime('%H:%M') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h4>У вас нет заказов на сегодня</h4>
+                    <p>Выберите блюдо из меню</p>
+                </div>
+                {% endif %}
+
+                <div class="nav-links">
+                    <a href="{{ url_for('menu') }}" class="btn btn-secondary">
+                        <i class="fas fa-book"></i> Полное меню
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Информация о системе -->
+        <div class="dashboard-card">
+            <h3><i class="fas fa-info-circle"></i> Как это работает</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div>
+                    <h4><i class="fas fa-shopping-cart"></i> Заказ</h4>
+                    <p>Выберите блюдо из меню и нажмите "Заказать". Средства будут списаны с вашего баланса.</p>
+                </div>
+                <div>
+                    <h4><i class="fas fa-money-bill-wave"></i> Оплата</h4>
+                    <p>Все заказы оплачиваются автоматически с баланса. Пополнить баланс можно у администратора.</p>
+                </div>
+                <div>
+                    <h4><i class="fas fa-box"></i> Получение</h4>
+                    <p>Заберите заказ в столовой в указанное время. Повар выдаст заказ после оплаты.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Личный кабинет ученика загружен');
+
+        // Подтверждение заказа
+        const orderForms = document.querySelectorAll('form');
+        orderForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (this.querySelector('input[name="menu_id"]')) {
+                    if (!confirm('Подтвердить заказ? Средства будут списаны с вашего баланса.')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

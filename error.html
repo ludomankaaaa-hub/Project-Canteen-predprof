@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка - Школьная столовая{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1>Ошибка</h1>
+        
+        <div class="error-message">
+            {% if message %}
+                <p>{{ message }}</p>
+            {% else %}
+                <p>Произошла непредвиденная ошибка</p>
+            {% endif %}
+        </div>
+        
+        <div class="error-details">
+            <p><strong>Что произошло?</strong></p>
+            <ul>
+                <li>У вас нет доступа к запрашиваемой странице</li>
+                <li>Истекло время сессии</li>
+                <li>Произошла техническая ошибка</li>
+            </ul>
+        </div>
+        
+        <div class="error-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> На главную
+            </a>
+            
+            {% if not session.user_id %}
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                <i class="fas fa-sign-in-alt"></i> Войти в систему
+            </a>
+            {% endif %}
+            
+            <button onclick="history.back()" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Вернуться назад
+            </button>
+        </div>
+        
+        <div class="error-help">
+            <p><i class="fas fa-info-circle"></i> Если проблема повторяется, обратитесь к администратору</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.error-card {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.error-icon {
+    font-size: 80px;
+    color: #FF9800;
+    margin-bottom: 20px;
+}
+
+.error-card h1 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 2.2rem;
+}
+
+.error-message {
+    background: #FFF3E0;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border-left: 4px solid #FF9800;
+}
+
+.error-message p {
+    margin: 0;
+    color: #333;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.error-details {
+    text-align: left;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.error-details p {
+    margin-top: 0;
+    color: #333;
+    font-weight: 500;
+}
+
+.error-details ul {
+    margin: 10px 0;
+    padding-left: 20px;
+    color: #666;
+}
+
+.error-details li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.error-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #388E3C;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #2196F3;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #1976D2;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #333;
+    border: 2px solid #ddd;
+}
+
+.btn-outline:hover {
+    border-color: #999;
+    background: #f5f5f5;
+}
+
+.error-help {
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.error-help i {
+    margin-right: 8px;
+    color: #2196F3;
+}
+
+@media (max-width: 768px) {
+    .error-card {
+        padding: 25px;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
