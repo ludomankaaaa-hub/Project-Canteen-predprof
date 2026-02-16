@@ -1,1 +1,7 @@
-# Project-Canteen-predprof
+# Школьная столовая - Веб-приложение
+
+## Установка и запуск
+
+1. Установите зависимости:
+```bash
+pip install -r requirements.txt
